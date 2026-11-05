@@ -86,7 +86,7 @@ window.__ModuleLoader__.load({
         'tip.tokens': '总 Token',
         'tip.calls': '调用',
         'tip.sessions': '会话',
-        'tip.models': '主要模型',
+        'tip.models': '模型占比',
         'tip.empty': '无用量',
         'tip.breakdown': '会话构成',
         'partial': '{n} 个会话读取失败，未计入统计',
@@ -154,7 +154,7 @@ window.__ModuleLoader__.load({
         'tip.tokens': 'Tokens',
         'tip.calls': 'Calls',
         'tip.sessions': 'Sessions',
-        'tip.models': 'Top model',
+        'tip.models': 'Models by share',
         'tip.empty': 'No usage',
         'tip.breakdown': 'Sessions',
         'partial': '{n} sessions could not be read and are not counted',
@@ -764,7 +764,7 @@ window.__ModuleLoader__.load({
           tokens: entry?.tokens ?? 0,
           calls: entry?.calls ?? 0,
           sessions: entry?.sessions.size ?? 0,
-          top: ranked.length === 0 ? '' : ranked[0][0],
+          models: ranked.map(([name, tokens]) => ({ name, tokens })),
           weekday: weekdayLabel(cell.date, localeTag),
         })
       }
@@ -847,8 +847,13 @@ window.__ModuleLoader__.load({
           h('span', null, t('tip.sessions')),
           h('b', null, String(tip.sessions))),
       ]
-      if (tip.top !== '') {
-        rows.push(h('div', { className: 'dtd-tip-model', key: 'model' }, `${t('tip.models')} ${tip.top}`))
+      if (Array.isArray(tip.models) && tip.models.length > 0) {
+        rows.push(h('div', { className: 'dtd-tip-sep', key: 'models-label' }, t('tip.models')))
+        tip.models.forEach((entry, index) => {
+          rows.push(h('div', { className: 'dtd-tip-row dtd-tip-session', key: `model-${index}` },
+            h('span', { title: entry.name }, entry.name),
+            h('b', null, `${compactNumber(entry.tokens)} · ${percentOf(entry.tokens, tip.tokens)}`)))
+        })
       }
       return h('div', { className: 'dtd-tip', style: { left: `${tip.x}px`, top: `${tip.y}px` } }, title, ...rows)
     }
@@ -1259,12 +1264,12 @@ window.__ModuleLoader__.load({
 .dtd-cell[data-empty="true"]:hover { outline: none; }
 .dtd-cell:hover { outline: 1px solid color-mix(in srgb, currentColor 55%, transparent); outline-offset: 1px; }
 .dtd-cal-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 9px; font-size: 10px; opacity: .55; }
-.dtd-tip { position: absolute; z-index: 60; transform: translate(-50%, -100%); min-width: 160px; max-width: 260px; padding: 8px 10px 9px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, .35)); background: var(--dsw-alias-bg-overlay, #1f2329); color: var(--dsw-alias-label-primary, #ffffff); box-shadow: 0 6px 22px rgba(0, 0, 0, .24); pointer-events: none; font-size: 11.5px; }
+.dtd-tip { position: absolute; z-index: 60; transform: translate(-50%, -100%); min-width: 160px; max-width: 320px; padding: 8px 10px 9px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, .35)); background: var(--dsw-alias-bg-overlay, #1f2329); color: var(--dsw-alias-label-primary, #ffffff); box-shadow: 0 6px 22px rgba(0, 0, 0, .24); pointer-events: none; font-size: 11.5px; }
 .dtd-tip-title { margin-bottom: 5px; font-weight: 650; }
 .dtd-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; }
 .dtd-tip-row > span { opacity: .7; }
 .dtd-tip-session { gap: 10px; }
-.dtd-tip-session > span { opacity: .85; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dtd-tip-session > span { opacity: .85; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dtd-tip-sep { margin: 6px 0 4px; padding-top: 5px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); font-size: 10.5px; opacity: .6; }
 .dtd-tip-model { margin-top: 5px; padding-top: 5px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); opacity: .72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `
