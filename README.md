@@ -33,7 +33,7 @@
 
 2. 在 DSH 里安装这个 bundle。任选其一：
    - **交给会话里的 Agent**：说「把 `/path/to/dsh-token-dog` 装成插件」，它会调用 `plugin_manager` 的 `install_bundle`；
-   - **命令行**：在已安装 profile 的环境里 `dsh plugin --profile desktop add link:/path/to/dsh-token-dog`。
+   - **命令行**（装了 dsh CLI 时）：`dsh plugin --profile desktop add link:/path/to/dsh-token-dog`；Desktop 版没有 CLI，用上面那种方式即可。
 
 安装后 profile 的 `package.json` 会多一条 `"dsh-token-dog": "link:..."`，并加入 `dsh.profile.bundles`。
 
