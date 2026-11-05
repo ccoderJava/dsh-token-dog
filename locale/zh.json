@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Token 小狗",
+    "description": "统计会话与模型的 Token 用量，底部日历活跃图悬停即可查看每日用量。"
+  }
+}

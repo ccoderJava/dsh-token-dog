@@ -1,0 +1,6 @@
+# dsh-token-dog bundle patch: one row mounts both halves.
+# The Host half folds the Session logs into usage rows and serves them from a
+# loopback-only route; the browser half renders the settings page.
+- insert:
+    - id: token-dog
+      name: 'dsh-token-dog'

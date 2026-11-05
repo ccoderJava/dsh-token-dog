@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Token Dog">
+  <rect width="64" height="64" rx="14" fill="#4D6BFE"/>
+  <ellipse cx="15.5" cy="17" rx="6" ry="9.5" transform="rotate(-32 15.5 17)" fill="#D8E1FF"/>
+  <ellipse cx="44.5" cy="17" rx="6" ry="9.5" transform="rotate(32 44.5 17)" fill="#D8E1FF"/>
+  <circle cx="30" cy="29" r="14.5" fill="#FFFFFF"/>
+  <ellipse cx="30" cy="35.5" rx="8.5" ry="7" fill="#E9EEFF"/>
+  <circle cx="24.5" cy="26" r="2.1" fill="#2B3550"/>
+  <circle cx="35.5" cy="26" r="2.1" fill="#2B3550"/>
+  <ellipse cx="30" cy="32.5" rx="3.1" ry="2.3" fill="#2B3550"/>
+  <path d="M30 35.2v3.4" stroke="#2B3550" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="47.5" cy="45.5" r="9.5" fill="#FFD666" stroke="#4D6BFE" stroke-width="2.4"/>
+  <rect x="45.9" y="40.6" width="3.2" height="9.8" rx="1.6" fill="#5A4300"/>
+  <rect x="42.6" y="40.6" width="9.8" height="3.2" rx="1.6" fill="#5A4300"/>
+</svg>
