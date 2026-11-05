@@ -1,45 +1,119 @@
 # dsh-token-dog · Token 小狗
 
-> 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的 Token 用量面板：按会话、按模型统计消耗，配每日堆叠矩形图与全年日历活跃图。
+> DeepSeek Harness 的 Token 用量面板：按会话、按模型统计消耗，配每日堆叠矩形图与全年日历活跃图。
+>
+> *Token usage for the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web GUI — per-session and per-model totals, a daily stacked bar chart, and a year-long calendar heatmap.*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](./LICENSE)
+![DSH](https://img.shields.io/badge/DeepSeek%20Harness-0.2.x-blueviolet)
 
 插件直接读 Session 日志，所以**装上之前的对话也一起统计**，不需要从今天开始重新记账。
 
+## 效果
+
 ```
-┌ 总 Token  ┬ 缓存命中率 ┬ 输出 Token ┬ 调用次数 ┐
-├ 每日消耗（按会话堆叠的矩形图，悬停看当天构成）  ┤
-├ 模型用量（可点进详情）  │  会话排行             ┤
-└ 活跃日历（近 52 周，悬停看每日用量）            ┘
+┌──────────────────────────────────────────────────────────────────────┐
+│ Token 用量  统计每个会话与模型的 Token 消耗        ● ● ● ● ● ● ● ● 淡 中 浓  刷新 │
+├───────────┬───────────┬───────────┬───────────┬──────────────────────┤
+│ 总 Token  │ 缓存命中率 │ 输出 Token │ 调用次数  │  总 37.9M / 98% …    │
+├───────────┴───────────┴───────────┴───────────┴──────────────────────┤
+│ 每日消耗 · 按会话堆叠 · 峰值 23.8M                                     │
+│            ▁    ▂   ▃    █                                          │
+│            10/30 10/31 11/2 11/3 11/4 11/5                          │
+├───────────────────────────────────┬──────────────────────────────────┤
+│ 模型用量          点击查看全部会话 │ 会话排行             按用量排序  │
+│ deepseek-flash            37.9M   │ dsh-token-dog …          22.1M  │
+│ ████████████████████████████████  │ ████████████████████            │
+├───────────────────────────────────┴──────────────────────────────────┤
+│ 活跃日历 · 近一年 · 悬停查看每日用量                                   │
+│ 一 ░░▓▓░░██▓░░▓░░█▓░░▓▓░░██▓░  … 12 个月                             │
+└──────────────────────────────────────────────────────────────────────┘
 ```
+
+四个区块：
+
+| 区块 | 长什么样 | 能干什么 |
+|---|---|---|
+| **统计卡** | 四张卡，大数字是同色系强调色 | 一眼看总量、缓存命中率、输出占比、日均调用 |
+| **每日消耗** | 每天一根柱，柱内按会话分段（最多 6 段 + 其他），天数越多柱越细 | 悬停任一天，看当天总量、调用次数、前 4 个会话的明细 |
+| **模型用量 / 会话排行** | 两列卡片列表，每行带占比条 | 点模型行进入该模型的详情页 |
+| **活跃日历** | 52 周 × 7 天的格子，5 档深浅 | 悬停任意一天，看当天用量；列宽不足时自动滚到最近日期 |
 
 ## 功能
 
 - **概览页**：四张统计卡（总 Token / 缓存命中率 / 输出 Token / 调用次数）、每日消耗矩形图、模型与会话排行、全年日历热力图
 - **每日矩形图**：每天一根柱子，按当天消耗的会话堆叠；悬停显示当天总量、调用次数与前 4 个会话的明细
 - **模型详情**：点任意模型行进入，看该模型自己的每日矩形图与**全部**消耗过它的会话，可一键返回
-- **日历活跃图**：近 52 周、周一开头；5 档强度按当天 Token 的分位数自动分级；列宽不足时自动滚到最近日期
+- **日历活跃图**：近 52 周、周一开头；5 档强度按当天 Token 的分位数自动分级
 - **区间切换**：近 7 天 / 近 30 天 / 近 90 天 / 全部，作用于统计卡、矩形图、排行与模型详情
 - **外观**：8 个低饱和预设色 + 自定义取色器 + 淡/中/浓三档，选择记在 localStorage
 - **中英双语**：文案跟随宿主语言；缺字典时回退中文
+- **只用本机**：数据不过网，路由只接受回环请求
 
 ## 安装
 
-插件是普通的 DSH bundle，不需要构建，也不需要 `node_modules`。
+本插件没有发布到 npm，也不经过构建，安装的是这个目录本身。已经装有
+[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（Desktop 版或 `dsh web`，0.2.x）就可以装。
 
-1. 把仓库放到本机任意目录：
+### 第 0 步：拿到目录
 
-   ```bash
-   git clone https://github.com/ccoderJava/dsh-token-dog.git
-   ```
+```bash
+git clone https://github.com/ccoderJava/dsh-token-dog.git
+```
 
-2. 在 DSH 里安装这个 bundle。任选其一：
-   - **交给会话里的 Agent**：说「把 `/path/to/dsh-token-dog` 装成插件」，它会调用 `plugin_manager` 的 `install_bundle`；
-   - **命令行**（装了 dsh CLI 时）：`dsh plugin --profile desktop add link:/path/to/dsh-token-dog`；Desktop 版没有 CLI，用上面那种方式即可。
+没有 git 也可以点仓库右上角 **Code → Download ZIP** 解压。
 
-安装后 profile 的 `package.json` 会多一条 `"dsh-token-dog": "link:..."`，并加入 `dsh.profile.bundles`。
+### 方式一：让 DSH 里的 Agent 装（推荐，不用命令行）
 
-3. 刷新页面（Cmd/Ctrl+R）。入口有两个：
-   - 左侧栏底部的**小狗图标**；
-   - **设置 → Token 用量**（设置导航最后一项）。
+在 DSH 里**随便开一个会话**，发这样一句话（把路径换成你 clone 下来的实际路径）：
+
+> 把 `/Users/you/plugins/dsh-token-dog` 这个目录装成插件
+
+Agent 会调用内置的 `plugin_manager` 完成安装：把 `dsh-token-dog` 写进当前 profile 的
+`package.json`（以 `link:` 方式指到该目录），并加入 `dsh.profile.bundles`。安装是即时的，
+返回里的 `application` 为 `applied` 就表示已生效。
+
+### 方式二：命令行
+
+装了 `dsh` CLI 的环境里（Desktop 版通常没有 CLI，用方式一即可）：
+
+```bash
+dsh plugin --profile desktop add link:/absolute/path/to/dsh-token-dog
+```
+
+`desktop` 是你的 profile 名（默认 `desktop`；CLI 用户可能是 `default`）。
+
+### 第 2 步：刷新并打开
+
+安装完成后 **刷新页面**（Cmd/Ctrl + R）。入口有两个，任选：
+
+1. **左侧栏最底部的 🐶 图标** —— 点一下整页打开；
+2. **设置（齿轮）→ 左侧导航最后一项「Token 用量」**。
+
+第一次打开会扫一遍历史会话（几十个会话约 1 秒以内），之后结果缓存 60 秒。
+
+### 第 3 步：确认装好了
+
+- 设置 → 插件 → 已安装里能看到 **Token 小狗**（包名 `dsh-token-dog`），带小狗图标；
+- 左侧栏出现了小狗图标；
+- 想从命令行确认数据链路：
+
+  ```bash
+  curl -s "http://127.0.0.1:<GUI 端口>/token-dog/usage?tz=Asia/Shanghai" | head -c 300
+  ```
+
+### 更新
+
+方式一装的是软链，**改完/拉完代码刷新页面就生效**，不需要重装：
+
+```bash
+cd dsh-token-dog && git pull
+```
+
+### 卸载
+
+对 DSH 里说「把 dsh-token-dog 插件卸了」（`plugin_manager` 的 `remove_bundle`），
+或命令行 `dsh plugin --profile desktop remove dsh-token-dog`。
 
 ## 使用
 
@@ -55,7 +129,7 @@
 
 ### 模型详情
 
-点模型行进入，面包屑变为 `← 返回` + 模型名，内容替换为该模型的统计卡、每日矩形图，以及**不截断**的会话列表。顶部区间切换对详情同样生效。
+点模型行进入，顶部变为 `← 返回` + 模型名，内容替换为该模型的统计卡、每日矩形图，以及**不截断**的会话列表。顶部区间切换对详情同样生效。
 
 ### 主题
 
@@ -131,6 +205,23 @@ dsh-token-dog/
 
 - 调参在 `index.js` 顶部：`SCAN_TTL_MS`（缓存）、`MAX_AGE_DAYS`（扫描窗口）、`MAX_SESSIONS`
 - 图表与色板在 `client.js`：`MAX_BARS`、`SEGMENT_LIMIT`、`THEMES`、CSS 变量 `--dtd-ink*` / `--dtd-g*`
+
+## 常见问题
+
+**为什么旧对话也算进去了？**
+插件不是「从今天开始记」，而是每次打开时回放 Session 日志里的 `assistant/message` 事件，所以历史用量本来就在。
+
+**为什么模型只有一个？**
+说明这些会话都跑在同一个 provider/model 上（例如 `deepseek-account / deepseek-flash`）。切换模型后，新会话会各自成行。
+
+**数据会上传吗？**
+不会。浏览器只请求本机 `127.0.0.1` 上的一条回环路由，路由拒绝非本机、跨站和带转发头的请求。
+
+**为什么和账单对不上？**
+这里统计的是 Session 日志里的 token 数，不含标题生成、压缩等不写日志的后台调用，也不做价格换算。
+
+**装了没反应？**
+先刷新页面；再看 设置 → 插件 里这一行是否 enabled；最后确认宿主版本是 0.2.x（席位契约可能随大版本变化）。
 
 ## 已知限制
 
