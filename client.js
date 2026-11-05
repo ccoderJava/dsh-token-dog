@@ -990,6 +990,14 @@ window.__ModuleLoader__.load({
         ? t('others')
         : sessionName(meta, sessionId, t)), [meta, t])
 
+      const sidebarToggle = h('label', { className: 'dtd-switch', title: t('sidebar') },
+        h('input', {
+          type: 'checkbox',
+          checked: sidebarIcon,
+          onChange: (event) => setSidebarIcon(event.target.checked),
+        }),
+        h('span', null, t('sidebar')))
+
       const header = h('div', { className: 'dtd-toolbar' },
         h('div', { className: 'dtd-seg', role: 'group' },
           RANGES.map((id) => h('button', {
@@ -1034,13 +1042,7 @@ window.__ModuleLoader__.load({
               'aria-pressed': depthId === option ? 'true' : 'false',
               onClick: () => setDepthId(option),
             }, t(`depth.${option}`)))),
-          h('label', { className: 'dtd-switch', title: t('sidebar') },
-            h('input', {
-              type: 'checkbox',
-              checked: sidebarIcon,
-              onChange: (event) => setSidebarIcon(event.target.checked),
-            }),
-            h('span', null, t('sidebar'))),
+          variant === 'panel' ? null : sidebarToggle,
           h('button', {
             type: 'button',
             className: 'dtd-refresh',
@@ -1133,14 +1135,16 @@ window.__ModuleLoader__.load({
         : h('div', { className: 'dtd-detail-head' },
           h('button', { type: 'button', className: 'dtd-back', onClick: () => setModelKey(null) }, `← ${t('back')}`),
           h('span', { className: 'dtd-detail-title' }, detail.name === '' ? modelKey : detail.name),
-          h('span', { className: 'dtd-detail-sub' }, detail.provider))
+          h('span', { className: 'dtd-detail-sub' }, detail.provider),
+          variant === 'panel' ? sidebarToggle : null)
 
       const body = h('div', { className: 'dtd-root', 'data-dsh-plugin': 'token-dog', 'data-depth': depthId, style: { '--dtd-accent': accent } },
         h('style', null, CSS),
         variant === 'panel' && detail === null
           ? h('div', { className: 'dtd-page-head' },
             h('h1', { className: 'dtd-page-title' }, t('nav')),
-            h('span', { className: 'dtd-page-sub' }, t('pageSub')))
+            h('span', { className: 'dtd-page-sub' }, t('pageSub')),
+            sidebarToggle)
           : null,
         back,
         header,
@@ -1198,7 +1202,8 @@ window.__ModuleLoader__.load({
     const CSS = `
 .dtd-page { height: 100%; min-height: 0; overflow: auto; box-sizing: border-box; padding: 24px clamp(16px, 4vw, 48px) 32px; }
 .dtd-page-inner { display: flex; flex-direction: column; gap: 14px; max-width: 1040px; margin: 0 auto; }
-.dtd-page-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; }
+.dtd-page-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; }
+.dtd-page-head .dtd-switch { align-self: center; margin-left: 2px; }
 .dtd-page-title { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.015em; }
 .dtd-page-sub { font-size: 12px; color: var(--dsw-alias-label-secondary, currentColor); opacity: .9; }
 .dtd-root {
