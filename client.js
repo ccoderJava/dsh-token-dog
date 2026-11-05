@@ -1264,12 +1264,13 @@ window.__ModuleLoader__.load({
 .dtd-cell[data-empty="true"]:hover { outline: none; }
 .dtd-cell:hover { outline: 1px solid color-mix(in srgb, currentColor 55%, transparent); outline-offset: 1px; }
 .dtd-cal-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 9px; font-size: 10px; opacity: .55; }
-.dtd-tip { position: absolute; z-index: 60; transform: translate(-50%, -100%); min-width: 160px; max-width: 320px; padding: 8px 10px 9px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, .35)); background: var(--dsw-alias-bg-overlay, #1f2329); color: var(--dsw-alias-label-primary, #ffffff); box-shadow: 0 6px 22px rgba(0, 0, 0, .24); pointer-events: none; font-size: 11.5px; }
+.dtd-tip { position: absolute; z-index: 60; transform: translate(-50%, -100%); min-width: 180px; max-width: 340px; padding: 8px 10px 9px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, .35)); background: var(--dsw-alias-bg-overlay, #1f2329); color: var(--dsw-alias-label-primary, #ffffff); box-shadow: 0 6px 22px rgba(0, 0, 0, .24); pointer-events: none; font-size: 11.5px; }
 .dtd-tip-title { margin-bottom: 5px; font-weight: 650; }
-.dtd-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; }
-.dtd-tip-row > span { opacity: .7; }
+.dtd-tip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dtd-tip-row > span { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; opacity: .7; }
+.dtd-tip-row > b { flex: 0 0 auto; font-weight: 650; }
 .dtd-tip-session { gap: 10px; }
-.dtd-tip-session > span { opacity: .85; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dtd-tip-session > span { flex: 1 1 auto; opacity: .85; }
 .dtd-tip-sep { margin: 6px 0 4px; padding-top: 5px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); font-size: 10.5px; opacity: .6; }
 .dtd-tip-model { margin-top: 5px; padding-top: 5px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); opacity: .72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `
