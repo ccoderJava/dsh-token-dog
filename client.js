@@ -40,6 +40,7 @@ window.__ModuleLoader__.load({
         'theme.rose': '豆沙',
         'theme.gray': '中性',
         'theme.custom': '自定义',
+        'sidebar': '侧栏图标',
         'depth': '浓淡',
         'depth.soft': '淡',
         'depth.medium': '中',
@@ -108,6 +109,7 @@ window.__ModuleLoader__.load({
         'theme.rose': 'Rose',
         'theme.gray': 'Neutral',
         'theme.custom': 'Custom',
+        'sidebar': 'Sidebar icon',
         'depth': 'Strength',
         'depth.soft': 'Soft',
         'depth.medium': 'Normal',
@@ -390,7 +392,45 @@ window.__ModuleLoader__.load({
       return { ...state, refresh }
     }
 
+    const SIDEBAR_KEY = 'dsh-token-dog:sidebar'
     const THEME_KEY = 'dsh-token-dog:theme'
+    // Whether the rail shows this plugin's icon; shared by the Host-less half
+    // (`apply`, which owns the registration) and the page (which flips it).
+    function createSidebarPreference() {
+      let value
+      try {
+        value = window.localStorage.getItem(SIDEBAR_KEY) !== 'hidden'
+      } catch {
+        value = true
+      }
+      const listeners = new Set()
+      return {
+        get: () => value,
+        set(next) {
+          if (next === value) return
+          value = next
+          try {
+            window.localStorage.setItem(SIDEBAR_KEY, next ? 'shown' : 'hidden')
+          } catch {
+            // A storage-denied browser keeps the choice for this page only.
+          }
+          for (const listener of [...listeners]) {
+            try {
+              listener()
+            } catch {
+              // One stale listener must not block the rest.
+            }
+          }
+        },
+        subscribe(listener) {
+          listeners.add(listener)
+          return () => listeners.delete(listener)
+        },
+      }
+    }
+
+    const sidebarPreference = createSidebarPreference()
+
     const DEPTH_KEY = 'dsh-token-dog:depth'
     const CUSTOM_KEY = 'dsh-token-dog:custom'
     // Muted, low-saturation accents: present on the page without shouting.
@@ -444,6 +484,12 @@ window.__ModuleLoader__.load({
         // Fall through to the default.
       }
       return 'medium'
+    }
+
+    function useSidebarIcon() {
+      const [visible, setVisible] = useState(() => sidebarPreference.get())
+      useEffect(() => sidebarPreference.subscribe(() => setVisible(sidebarPreference.get())), [])
+      return [visible, (next) => sidebarPreference.set(next)]
     }
 
     function useLocaleTag(locale) {
@@ -906,6 +952,7 @@ window.__ModuleLoader__.load({
       const [themeId, setThemeId] = useState(readTheme)
       const [depthId, setDepthId] = useState(readDepth)
       const [custom, setCustom] = useState(readCustom)
+      const [sidebarIcon, setSidebarIcon] = useSidebarIcon()
       const accent = themeId === 'custom' ? custom : themeOf(themeId).accent
       useEffect(() => {
         try {
@@ -987,6 +1034,13 @@ window.__ModuleLoader__.load({
               'aria-pressed': depthId === option ? 'true' : 'false',
               onClick: () => setDepthId(option),
             }, t(`depth.${option}`)))),
+          h('label', { className: 'dtd-switch', title: t('sidebar') },
+            h('input', {
+              type: 'checkbox',
+              checked: sidebarIcon,
+              onChange: (event) => setSidebarIcon(event.target.checked),
+            }),
+            h('span', null, t('sidebar'))),
           h('button', {
             type: 'button',
             className: 'dtd-refresh',
@@ -1203,6 +1257,13 @@ window.__ModuleLoader__.load({
 .dtd-depth { display: inline-flex; gap: 2px; padding: 2px; border-radius: 6px; background: color-mix(in srgb, var(--dtd-accent) 9%, transparent); }
 .dtd-depth-btn { appearance: none; border: 0; background: transparent; color: inherit; font: inherit; font-size: 11px; padding: 1px 7px; border-radius: 4px; cursor: pointer; opacity: .6; }
 .dtd-depth-btn[aria-pressed="true"] { opacity: 1; background: color-mix(in srgb, var(--dtd-accent) 22%, transparent); font-weight: 600; }
+.dtd-switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 11px; opacity: .8; user-select: none; }
+.dtd-switch:hover { opacity: 1; }
+.dtd-switch input { appearance: none; -webkit-appearance: none; position: relative; width: 26px; height: 15px; margin: 0; border-radius: 999px; background: color-mix(in srgb, currentColor 22%, transparent); cursor: pointer; transition: background-color .15s ease; }
+.dtd-switch input::after { content: ''; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); transition: transform .15s ease; }
+.dtd-switch input:checked { background: color-mix(in srgb, var(--dtd-accent) 80%, transparent); }
+.dtd-switch input:checked::after { transform: translateX(11px); }
+.dtd-switch input:focus-visible { outline: 2px solid color-mix(in srgb, var(--dtd-accent) 60%, transparent); outline-offset: 2px; }
 .dtd-note { margin: 0; font-size: 12px; opacity: .6; }
 .dtd-error { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--dsw-alias-state-error-primary, inherit); }
 .dtd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 10px; }
@@ -1312,12 +1373,34 @@ window.__ModuleLoader__.load({
         key: PANEL_ID,
       }, () => h(UsagePage, { t, locale, variant: 'panel' })))
 
-      ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
-        name: 'sidebar.panellist',
-        id: PANEL_ID,
-        order: 12,
-        label: () => t('nav'),
-      }, PanelIcon))
+      // The rail icon follows the page's switch: disposing the injection removes
+      // the registration, so the button disappears from the sidebar as well.
+      let stopIcon = null
+      const syncIcon = () => {
+        const wanted = sidebarPreference.get()
+        if (wanted && stopIcon === null) {
+          stopIcon = ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+            name: 'sidebar.panellist',
+            id: PANEL_ID,
+            order: 12,
+            label: () => t('nav'),
+          }, PanelIcon))
+        } else if (!wanted && stopIcon !== null) {
+          stopIcon()
+          stopIcon = null
+        }
+      }
+      ctx.effect(() => {
+        const unsubscribe = sidebarPreference.subscribe(syncIcon)
+        syncIcon()
+        return () => {
+          unsubscribe()
+          if (stopIcon !== null) {
+            stopIcon()
+            stopIcon = null
+          }
+        }
+      }, 'dsh-token-dog: sidebar icon')
     }
 
     return { inject: ['slots', 'locale'], apply }
